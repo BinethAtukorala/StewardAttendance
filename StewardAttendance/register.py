@@ -1,7 +1,7 @@
 import time
 import RPi.GPIO as GPIO
 import SimpleMFRC522
-import firebase
+from firebase import firebase
 import datetime
 
 from os import system
@@ -9,7 +9,11 @@ from os import system
 GPIO.setwarnings(False)
 GPIO.cleanup()
 
-fb = firebase.FirebaseApplication('https://stewardattendence.firebaseio.com/', None)
+SECRET = 'pK9jJOi2UBz7x6JmdDhg4HmY3T8IpBcT5Ns0Mpq0'
+EMAIL = 'bineth.mandiv@gmail.com'
+authentication = firebase.FirebaseAuthentication(SECRET,EMAIL, True, True)
+
+fb = firebase.FirebaseApplication('https://stewardattendence.firebaseio.com/', authentication)
 
 reader = SimpleMFRC522.SimpleMFRC522()
 
@@ -47,10 +51,12 @@ try:
             print("Card found : "+str(id))
             usrNo = findID(id)
             if(usrNo != MAX_NO):
-                print(usrs[usrNo][2]+" attendance recorded")
-                now = datetime.datetime.now()
-                time_now = str(now.hour)+'.'+str(now.minute)+'.'+str(now.second)
-                fb.patch('/'+date+'/'+str(usrNo)+'/', {'Presence':'1', 'time': time_now})
+                currentPresence = fb.get('/'+date+'/'+str(usrNo)+'/', 'Presence')
+                if(currentPresence == '0'):
+                    print(usrs[usrNo][2]+" attendance recorded")
+                    now = datetime.datetime.now()
+                    time_now = str(now.hour)+'.'+str(now.minute)+'.'+str(now.second)
+                    fb.patch('/'+date+'/'+str(usrNo)+'/', {'Presence':'1', 'time': time_now})
             else:
                 print("NOT FOUND")
 	    print("\n")
