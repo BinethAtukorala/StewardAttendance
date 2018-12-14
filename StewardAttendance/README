@@ -1,0 +1,8 @@
+Run register.py in python 2
+
+Needed python Libraries:
+	firebase
+
+GPIO pins for the RC522:
+	3.3v	->	3V3
+	
